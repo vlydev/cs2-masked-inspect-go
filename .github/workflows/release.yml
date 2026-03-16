@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Publish to pkg.go.dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Print module info
+        run: |
+          echo "Module: github.com/vlydev/cs2-masked-inspect-go"
+          echo "Version: ${{ github.ref_name }}"
+
+      - name: Trigger pkg.go.dev indexing
+        env:
+          GOPROXY: proxy.golang.org
+        run: |
+          VERSION="${{ github.ref_name }}"
+          curl -s "https://proxy.golang.org/github.com/vlydev/cs2-masked-inspect-go/@v/${VERSION}.info" || true
+          curl -s "https://sum.golang.org/lookup/github.com/vlydev/cs2-masked-inspect-go@${VERSION}" || true
