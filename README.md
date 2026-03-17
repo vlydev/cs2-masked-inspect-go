@@ -84,6 +84,29 @@ for _, kc := range item.Keychains {
 }
 ```
 
+## Gen codes
+
+Generate a Steam inspect URL from item parameters (defindex, paintindex, paintseed, paintwear):
+
+```go
+import "github.com/vlydev/cs2-masked-inspect-go/cs2inspect"
+
+// Generate a Steam inspect URL
+url, err := cs2inspect.Generate(7, 474, 306, 0.22540508, nil)
+
+// Convert to gen code
+item := &cs2inspect.ItemPreviewData{DefIndex: 7, PaintIndex: 474, PaintSeed: 306}
+pw := float32(0.22540508); item.PaintWear = &pw
+code := cs2inspect.ToGenCode(item, "!gen") // "!gen 7 474 306 0.22540508"
+
+// Parse a gen code
+item2, err := cs2inspect.ParseGenCode("!gen 7 474 306 0.22540508")
+
+// Convert an existing inspect link directly to a gen code
+code, err := cs2inspect.GenCodeFromLink("steam://rungame/730/76561202255233023/+csgo_econ_action_preview%20001A...", "!gen")
+// "!gen 7 474 306 0.22540508"
+```
+
 ## API Reference
 
 ### Functions
