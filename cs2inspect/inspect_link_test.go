@@ -826,3 +826,177 @@ func TestRoundtrip_HighlightReel(t *testing.T) {
 		t.Errorf("expected HighlightReel=345, got %d", *result.Keychains[0].HighlightReel)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Sticker Slab test vectors
+//
+// Sticker Slabs: defIndex=1355, quality=8, keychains[0].StickerID=37 (placeholder)
+// keychains[0].PaintKit = actual slab variant ID
+//
+// URL A: rarity=5, paintKit=7256
+// URL B: rarity=3, paintKit=275
+// ---------------------------------------------------------------------------
+
+const stickerSlabA = "steam://run/730//+csgo_econ_action_preview%20918191895A9BB191B994A199F991E191339096999181B4F149A98D5C0889"
+const stickerSlabB = "steam://run/730//+csgo_econ_action_preview%20CBDBCBD300C1EBCBE3C8FBC3A3CBBBCB69CACCC3CBDBEEAB58C9B8B67C83"
+
+func TestStickerSlabA_DefIndex(t *testing.T) {
+	item, err := Deserialize(stickerSlabA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.DefIndex != 1355 {
+		t.Errorf("expected DefIndex=1355, got %d", item.DefIndex)
+	}
+}
+
+func TestStickerSlabA_Quality(t *testing.T) {
+	item, err := Deserialize(stickerSlabA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Quality != 8 {
+		t.Errorf("expected Quality=8, got %d", item.Quality)
+	}
+}
+
+func TestStickerSlabA_Rarity(t *testing.T) {
+	item, err := Deserialize(stickerSlabA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Rarity != 5 {
+		t.Errorf("expected Rarity=5, got %d", item.Rarity)
+	}
+}
+
+func TestStickerSlabA_KeychainCount(t *testing.T) {
+	item, err := Deserialize(stickerSlabA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Keychains) != 1 {
+		t.Errorf("expected 1 keychain, got %d", len(item.Keychains))
+	}
+}
+
+func TestStickerSlabA_KeychainStickerID(t *testing.T) {
+	item, err := Deserialize(stickerSlabA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Keychains) == 0 {
+		t.Fatal("no keychains")
+	}
+	if item.Keychains[0].StickerID != 37 {
+		t.Errorf("expected StickerID=37, got %d", item.Keychains[0].StickerID)
+	}
+}
+
+func TestStickerSlabA_KeychainPaintKit(t *testing.T) {
+	item, err := Deserialize(stickerSlabA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Keychains) == 0 {
+		t.Fatal("no keychains")
+	}
+	if item.Keychains[0].PaintKit == nil {
+		t.Fatal("expected PaintKit to be non-nil")
+	}
+	if *item.Keychains[0].PaintKit != 7256 {
+		t.Errorf("expected PaintKit=7256, got %d", *item.Keychains[0].PaintKit)
+	}
+}
+
+func TestStickerSlabB_DefIndex(t *testing.T) {
+	item, err := Deserialize(stickerSlabB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.DefIndex != 1355 {
+		t.Errorf("expected DefIndex=1355, got %d", item.DefIndex)
+	}
+}
+
+func TestStickerSlabB_Quality(t *testing.T) {
+	item, err := Deserialize(stickerSlabB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Quality != 8 {
+		t.Errorf("expected Quality=8, got %d", item.Quality)
+	}
+}
+
+func TestStickerSlabB_Rarity(t *testing.T) {
+	item, err := Deserialize(stickerSlabB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Rarity != 3 {
+		t.Errorf("expected Rarity=3, got %d", item.Rarity)
+	}
+}
+
+func TestStickerSlabB_KeychainCount(t *testing.T) {
+	item, err := Deserialize(stickerSlabB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Keychains) != 1 {
+		t.Errorf("expected 1 keychain, got %d", len(item.Keychains))
+	}
+}
+
+func TestStickerSlabB_KeychainStickerID(t *testing.T) {
+	item, err := Deserialize(stickerSlabB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Keychains) == 0 {
+		t.Fatal("no keychains")
+	}
+	if item.Keychains[0].StickerID != 37 {
+		t.Errorf("expected StickerID=37, got %d", item.Keychains[0].StickerID)
+	}
+}
+
+func TestStickerSlabB_KeychainPaintKit(t *testing.T) {
+	item, err := Deserialize(stickerSlabB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Keychains) == 0 {
+		t.Fatal("no keychains")
+	}
+	if item.Keychains[0].PaintKit == nil {
+		t.Fatal("expected PaintKit to be non-nil")
+	}
+	if *item.Keychains[0].PaintKit != 275 {
+		t.Errorf("expected PaintKit=275, got %d", *item.Keychains[0].PaintKit)
+	}
+}
+
+func TestRoundtrip_PaintKit(t *testing.T) {
+	pk := uint32(7256)
+	data := &ItemPreviewData{
+		DefIndex:  1355,
+		Quality:   8,
+		Rarity:    5,
+		Keychains: []Sticker{{Slot: 0, StickerID: 37, PaintKit: &pk}},
+	}
+	result := roundtrip(t, data)
+	if len(result.Keychains) == 0 {
+		t.Fatal("no keychains after roundtrip")
+	}
+	if result.Keychains[0].StickerID != 37 {
+		t.Errorf("expected StickerID=37, got %d", result.Keychains[0].StickerID)
+	}
+	if result.Keychains[0].PaintKit == nil {
+		t.Fatal("expected PaintKit to be non-nil")
+	}
+	if *result.Keychains[0].PaintKit != 7256 {
+		t.Errorf("expected PaintKit=7256, got %d", *result.Keychains[0].PaintKit)
+	}
+}

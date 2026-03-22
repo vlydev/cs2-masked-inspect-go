@@ -108,6 +108,9 @@ func encodeSticker(s Sticker) []byte {
 	if s.HighlightReel != nil {
 		w.WriteUint32(11, *s.HighlightReel)
 	}
+	if s.PaintKit != nil {
+		w.WriteUint32(12, *s.PaintKit)
+	}
 	return w.Bytes()
 }
 
@@ -150,6 +153,9 @@ func decodeSticker(data []byte) (Sticker, error) {
 		case 11:
 			v := uint32(f.Varint)
 			s.HighlightReel = &v
+		case 12:
+			v := uint32(f.Varint)
+			s.PaintKit = &v
 		}
 	}
 

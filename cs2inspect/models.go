@@ -24,6 +24,7 @@ type Sticker struct {
 	OffsetZ       *float32 // wire type 5 (fixed32 LE), nil = omitted
 	Pattern       uint32
 	HighlightReel *uint32 // varint, nil = omitted
+	PaintKit      *uint32 // varint, nil = omitted (proto field 12)
 }
 
 // ItemPreviewData represents a CS2 item as encoded in an inspect link.
