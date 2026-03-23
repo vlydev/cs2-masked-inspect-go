@@ -6,6 +6,63 @@ import (
 	"testing"
 )
 
+func TestToGenCodeKeychainWithPaintKit(t *testing.T) {
+	wear := float32(0.0)
+	pk := uint32(929)
+	item := &ItemPreviewData{
+		DefIndex:   1355,
+		PaintIndex: 0,
+		PaintSeed:  0,
+		PaintWear:  &wear,
+		Keychains:  []Sticker{{Slot: 0, StickerID: 37, Wear: &wear, PaintKit: &pk}},
+	}
+	got := ToGenCode(item, "")
+	tokens := strings.Fields(got)
+	n := len(tokens)
+	if n < 3 {
+		t.Fatalf("expected at least 3 tokens, got %d: %q", n, got)
+	}
+	if tokens[n-3] != "37" || tokens[n-2] != "0" || tokens[n-1] != "929" {
+		t.Errorf("expected last 3 tokens to be '37 0 929', got: %q %q %q", tokens[n-3], tokens[n-2], tokens[n-1])
+	}
+}
+
+func TestToGenCodeKeychainWithoutPaintKitNoExtraToken(t *testing.T) {
+	wear := float32(0.0)
+	item := &ItemPreviewData{
+		DefIndex:   7,
+		PaintIndex: 0,
+		PaintSeed:  0,
+		PaintWear:  &wear,
+		Keychains:  []Sticker{{Slot: 0, StickerID: 36, Wear: &wear}},
+	}
+	got := ToGenCode(item, "")
+	tokens := strings.Fields(got)
+	n := len(tokens)
+	if n < 2 {
+		t.Fatalf("expected at least 2 tokens, got %d: %q", n, got)
+	}
+	if tokens[n-2] != "36" || tokens[n-1] != "0" {
+		t.Errorf("expected last 2 tokens to be '36 0', got: %q %q", tokens[n-2], tokens[n-1])
+	}
+}
+
+func TestGenCodeFromLinkSlabUrl(t *testing.T) {
+	slabUrl := "steam://run/730//+csgo_econ_action_preview%20819181994A8BA181A982B189E981F181238086898191A4E1208698F309C9"
+	code, err := GenCodeFromLink(slabUrl, "")
+	if err != nil {
+		t.Fatalf("GenCodeFromLink() error: %v", err)
+	}
+	tokens := strings.Fields(code)
+	n := len(tokens)
+	if n < 3 {
+		t.Fatalf("expected at least 3 tokens, got %d: %q", n, code)
+	}
+	if tokens[n-3] != "37" || tokens[n-2] != "0" || tokens[n-1] != "929" {
+		t.Errorf("expected last 3 tokens to be '37 0 929', got: %q %q %q", tokens[n-3], tokens[n-2], tokens[n-1])
+	}
+}
+
 func TestToGenCodeBasic(t *testing.T) {
 	wear := float32(0.22540508)
 	item := &ItemPreviewData{

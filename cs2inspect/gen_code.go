@@ -63,6 +63,9 @@ func serializeStickerPairs(stickers []Sticker, padTo int) []string {
 				wear = *s.Wear
 			}
 			result = append(result, fmt.Sprintf("%d", s.StickerID), formatFloat(wear))
+			if s.PaintKit != nil {
+				result = append(result, fmt.Sprintf("%d", *s.PaintKit))
+			}
 		}
 	}
 
