@@ -17,7 +17,7 @@ import (
 var (
 	hybridURLRe  = regexp.MustCompile(`(?i)S\d+A\d+D([0-9A-Fa-f]+)$`)
 	inspectURLRe = regexp.MustCompile(`(?i)(?:%20|\s|\+)A([0-9A-Fa-f]+)`)
-	maskedURLRe  = regexp.MustCompile(`(?i)csgo_econ_action_preview(?:%20|\s|\+)([0-9A-Fa-f]{10,})$`)
+	maskedURLRe  = regexp.MustCompile(`(?i)csgo_econ_action_preview(?:%20|\s|\+)%?([0-9A-Fa-f]{10,})$`)
 	classicURLRe = regexp.MustCompile(`(?i)csgo_econ_action_preview(?:%20|\s)[SM]\d+A\d+D\d+$`)
 	hexLettersRe = regexp.MustCompile(`[A-Fa-f]`)
 )
