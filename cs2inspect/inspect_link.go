@@ -18,6 +18,7 @@ var (
 	hybridURLRe  = regexp.MustCompile(`(?i)S\d+A\d+D([0-9A-Fa-f]+)$`)
 	inspectURLRe = regexp.MustCompile(`(?i)(?:%20|\s|\+)A([0-9A-Fa-f]+)`)
 	maskedURLRe  = regexp.MustCompile(`(?i)csgo_econ_action_preview(?:%20|\s|\+)%?([0-9A-Fa-f]{10,})$`)
+	hexOnlyRe    = regexp.MustCompile(`^[0-9A-Fa-f]+$`)
 	classicURLRe = regexp.MustCompile(`(?i)csgo_econ_action_preview(?:%20|\s)[SM]\d+A\d+D\d+$`)
 	hexLettersRe = regexp.MustCompile(`[A-Fa-f]`)
 )
@@ -319,21 +320,32 @@ func Serialize(data *ItemPreviewData) (string, error) {
 func Deserialize(input string) (*ItemPreviewData, error) {
 	hexStr := extractHex(input)
 
+	preview := input
+	if len(preview) > 120 {
+		preview = preview[:100] + "..."
+	}
+
 	if len(hexStr) > 4096 {
-		preview := input
-		if len(preview) > 64 {
-			preview = preview[:64] + "..."
-		}
-		return nil, fmt.Errorf("payload too long (max 4096 hex chars): %q", preview)
+		return nil, fmt.Errorf("%w: payload too long (max 4096 hex chars); input %q", ErrMalformedInspectLink, preview)
+	}
+
+	// Reject malformed hex BEFORE hex.DecodeString so callers get one
+	// consistent ErrMalformedInspectLink wrap, not the implementation-specific
+	// hex.ErrLength / hex.InvalidByteError leaking through.
+	if len(hexStr) == 0 || len(hexStr)%2 != 0 {
+		return nil, fmt.Errorf("%w: hex payload has invalid length (%d chars, must be even and non-empty); source likely truncated; input %q", ErrMalformedInspectLink, len(hexStr), preview)
+	}
+	if !hexOnlyRe.MatchString(hexStr) {
+		return nil, fmt.Errorf("%w: payload contains non-hex characters; input %q", ErrMalformedInspectLink, preview)
 	}
 
 	raw, err := hex.DecodeString(hexStr)
 	if err != nil {
-		return nil, fmt.Errorf("payload too short or invalid hex: %q", input)
+		return nil, fmt.Errorf("%w: hex decode failed (%v); input %q", ErrMalformedInspectLink, err, preview)
 	}
 
 	if len(raw) < 6 {
-		return nil, fmt.Errorf("payload too short or invalid hex: %q", input)
+		return nil, fmt.Errorf("%w: payload too short (%d bytes, need >=6); input %q", ErrMalformedInspectLink, len(raw), preview)
 	}
 
 	key := raw[0]
@@ -349,7 +361,11 @@ func Deserialize(input string) (*ItemPreviewData, error) {
 	// Layout: [key_byte] [proto_bytes] [4-byte checksum]
 	protoBytes := decrypted[1 : len(decrypted)-4]
 
-	return decodeItem(protoBytes)
+	item, err := decodeItem(protoBytes)
+	if err != nil {
+		return nil, fmt.Errorf("%w: protobuf decode failed (%v); payload likely corrupted or truncated; input %q", ErrMalformedInspectLink, err, preview)
+	}
+	return item, nil
 }
 
 // IsMasked returns true if the link contains a decodable protobuf payload
